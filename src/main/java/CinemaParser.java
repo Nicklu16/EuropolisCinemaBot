@@ -10,9 +10,14 @@ public class CinemaParser {
         Document doc = null;
         try {
             doc = Jsoup.connect("http://www.mirage.ru/schedule/raspisanie.htm").get();
-            Elements newsHeadlines = doc.select("td.col2 a.red");
+            Elements newsHeadlines = doc.select("table#innerTable tr");
+            // td.col2 a.red
             for (Element e : newsHeadlines) {
-                System.out.println(e.html());
+                String time = e.select("td.col1").first().text();
+                if (time.startsWith("24"))
+                    time = time.substring(2);
+                String name = e.select("td.col2 a.red").first().html();
+                System.out.println(time + " " + name);
             }
         } catch (IOException e) {
             e.printStackTrace();

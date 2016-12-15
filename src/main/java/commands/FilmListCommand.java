@@ -33,10 +33,14 @@ public class FilmListCommand extends BotCommand {
         Document doc = null;
         try {
             doc = Jsoup.connect("http://www.mirage.ru/schedule/raspisanie.htm").get();
-            Elements newsHeadlines = doc.select("td.col2 a.red");
+            Elements newsHeadlines = doc.select("table#innerTable tr");
             int count = 0;
             for (Element e : newsHeadlines) {
-                result.append(e.html()).append("\n");
+                String time = e.select("td.col1").first().text();
+                if (time.startsWith("24"))
+                    time = time.substring(2);
+                String name = e.select("td.col2 a.red").first().html();
+                result.append(String.format("%s %s%n", time, name));
                 count++;
                 if (count >= 20) {
                     sendOneMessage(absSender, chat, result);
