@@ -28,27 +28,35 @@ public class FilmListCommand extends BotCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
-        SendMessage msg = new SendMessage();
-        msg.setChatId(chat.getId().toString());
-        msg.enableHtml(true);
-
         StringBuilder result = new StringBuilder("<b>Список фильмов:</b>\n");
 
         Document doc = null;
         try {
             doc = Jsoup.connect("http://www.mirage.ru/schedule/raspisanie.htm").get();
             Elements newsHeadlines = doc.select("td.col2 a.red");
+            int count = 0;
             for (Element e : newsHeadlines) {
                 result.append(e.html()).append("\n");
+                count++;
+                if (count >= 20) {
+                    sendOneMessage(absSender, chat, result);
+                    result = new StringBuilder();
+                    count = 0;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        if (result.length() != 0)
+            sendOneMessage(absSender, chat, result);
+    }
 
+    private void sendOneMessage(AbsSender absSender, Chat chat, StringBuilder result) {
+        SendMessage msg = new SendMessage();
+        msg.setChatId(chat.getId().toString());
+        msg.enableHtml(true);
         msg.setText(result.toString());
-
-
         System.out.println(result);
 
         try {
